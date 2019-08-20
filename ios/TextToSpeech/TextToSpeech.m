@@ -33,8 +33,16 @@ RCT_EXPORT_MODULE()
         _synthesizer.delegate = self;
         _ducking = false;
         _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+        
+        // initialize audio player
+        NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:@"250-milliseconds-of-silence" ofType:@"mp3"];
+        NSURL *soundFileURL = [NSURL fileURLWithPath:soundFilePath isDirectory:false];
+        NSError *error;
+        
+        self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:&error];
+        self.audioPlayer.delegate = self;
     }
-
+    
     return self;
 }
 
@@ -54,13 +62,13 @@ RCT_EXPORT_METHOD(speak:(NSString *)text
     }
     
     AVSpeechUtterance *utterance = [[AVSpeechUtterance alloc] initWithString:text];
-
+    
     if(voice) {
         utterance.voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voice];
     } else if (_defaultVoice) {
         utterance.voice = _defaultVoice;
     }
-
+    
     if (_defaultRate) {
         utterance.rate = _defaultRate;
     }
@@ -74,45 +82,46 @@ RCT_EXPORT_METHOD(speak:(NSString *)text
     } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
         [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
     }
-
+    
     [self.synthesizer speakUtterance:utterance];
+    [self.audioPlayer play]; // play 250ms of silence to 'jog the audio queue' ref: forums.developer.apple.com/thread/23160
     resolve([NSNumber numberWithUnsignedLong:utterance.hash]);
 }
 
 RCT_EXPORT_METHOD(stop:(BOOL *)onWordBoundary resolve:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
 {
     AVSpeechBoundary boundary;
-
+    
     if(onWordBoundary != NULL && onWordBoundary) {
         boundary = AVSpeechBoundaryWord;
     } else {
         boundary = AVSpeechBoundaryImmediate;
     }
-
+    
     BOOL stopped = [self.synthesizer stopSpeakingAtBoundary:boundary];
-
+    
     resolve([NSNumber numberWithBool:stopped]);
 }
 
 RCT_EXPORT_METHOD(pause:(BOOL *)onWordBoundary resolve:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
 {
     AVSpeechBoundary boundary;
-
+    
     if(onWordBoundary != NULL && onWordBoundary) {
         boundary = AVSpeechBoundaryWord;
     } else {
         boundary = AVSpeechBoundaryImmediate;
     }
-
+    
     BOOL paused = [self.synthesizer pauseSpeakingAtBoundary:boundary];
-
+    
     resolve([NSNumber numberWithBool:paused]);
 }
 
 RCT_EXPORT_METHOD(resume:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
 {
     BOOL continued = [self.synthesizer continueSpeaking];
-
+    
     resolve([NSNumber numberWithBool:continued]);
 }
 
@@ -139,7 +148,7 @@ RCT_EXPORT_METHOD(setDefaultLanguage:(NSString *)language
                   reject:(RCTPromiseRejectBlock)reject)
 {
     AVSpeechSynthesisVoice *voice = [AVSpeechSynthesisVoice voiceWithLanguage:language];
-
+    
     if(voice) {
         _defaultVoice = voice;
         resolve(@"success");
@@ -153,7 +162,7 @@ RCT_EXPORT_METHOD(setDefaultVoice:(NSString *)identifier
                   reject:(RCTPromiseRejectBlock)reject)
 {
     AVSpeechSynthesisVoice *voice = [AVSpeechSynthesisVoice voiceWithIdentifier:identifier];
-
+    
     if(voice) {
         _defaultVoice = voice;
         resolve(@"success");
@@ -204,11 +213,11 @@ RCT_EXPORT_METHOD(voices:(RCTPromiseResolveBlock)resolve
     
     for (AVSpeechSynthesisVoice *voice in [AVSpeechSynthesisVoice speechVoices]) {
         [voices addObject:@{
-            @"id": voice.identifier,
-            @"name": voice.name,
-            @"language": voice.language,
-            @"quality": (voice.quality == AVSpeechSynthesisVoiceQualityEnhanced) ? @500 : @300
-        }];
+                            @"id": voice.identifier,
+                            @"name": voice.name,
+                            @"language": voice.language,
+                            @"quality": (voice.quality == AVSpeechSynthesisVoiceQualityEnhanced) ? @500 : @300
+                            }];
     }
     
     resolve(voices);

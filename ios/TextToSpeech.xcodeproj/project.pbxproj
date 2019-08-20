@@ -28,6 +28,7 @@
 		3A6FB2081D99E12200593599 /* libTextToSpeech.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libTextToSpeech.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A6FB20B1D99E12200593599 /* TextToSpeech.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextToSpeech.h; sourceTree = "<group>"; };
 		3A6FB20C1D99E12200593599 /* TextToSpeech.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextToSpeech.m; sourceTree = "<group>"; };
+		C932CC52230C3C0F00535293 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +45,7 @@
 		3A6FB1FF1D99E12200593599 = {
 			isa = PBXGroup;
 			children = (
+				C932CC52230C3C0F00535293 /* Sounds */,
 				3A6FB20A1D99E12200593599 /* TextToSpeech */,
 				3A6FB2091D99E12200593599 /* Products */,
 			);

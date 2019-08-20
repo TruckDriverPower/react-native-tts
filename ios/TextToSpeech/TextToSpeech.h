@@ -11,10 +11,11 @@
 
 @import AVFoundation;
 
-@interface TextToSpeech : RCTEventEmitter <RCTBridgeModule, AVSpeechSynthesizerDelegate>
+@interface TextToSpeech : RCTEventEmitter <RCTBridgeModule, AVSpeechSynthesizerDelegate, AVAudioPlayerDelegate>
 @property (nonatomic, strong) AVSpeechSynthesizer *synthesizer;
 @property (nonatomic, strong) AVSpeechSynthesisVoice *defaultVoice;
 @property (nonatomic) float defaultRate;
 @property (nonatomic) float defaultPitch;
 @property (nonatomic) bool ducking;
+@property (nonatomic, strong) AVAudioPlayer *audioPlayer;
 @end
